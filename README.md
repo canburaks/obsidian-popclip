@@ -17,7 +17,7 @@ There are two part of the workflow.
 ## Part I: Popclip Extension
 You can select the below text to install extension.
 
-![Popclip Obsidian Plugin](/video/popclip-obsidian.gif)
+![Popclip Obsidian Plugin](https://www.cbsofyalioglu.com/_next/image/?url=%2Fvideo%2Finstall-popclip-extension.gif&w=1536&q=75)
 
 ```YAML
 # PopClip - Obsidian extension, markdown variant 
