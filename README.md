@@ -1,13 +1,23 @@
 # Obsidian Popclip Plugin
+The plugin allows you to store the text you select on Obsidian which is captured by Popclip app.
 
-## Requirements
-The plugin requires you to have
-- Popclip application for MacOS.
-- Obsidian clipper extension for Popclip (Below)
+## What are the requirements?
+- You need a Popclip app on your MacOS.
+- You need an Obsidian app on your MacOS.
 
 
-## Popclip Extension
+## How does it work?
+There are two part of the workflow. 
+- Installing the Popclip extension.
+- Installing the Obsidian plugin. 
+
+
+
+
+## Part I: Popclip Extension
 You can select the below text to install extension.
+
+![Popclip Obsidian Plugin](/video/popclip-obsidian.gif)
 
 ```YAML
 # PopClip - Obsidian extension, markdown variant 
@@ -37,3 +47,13 @@ javascript: |
     popclip.openUrl(`obsidian://advanced-uri?vault=${vaultName}&daily=true&heading=popclip&data=%0A${clipping}&mode=append`) 
 #end
 ```
+
+## Part II: Installing the Obsidian plugin.
+I didn't submit the plugin yet. Therefore, you need to install it manually.
+
+I'm planning to submit it soon.
+
+![Obsidian plugin for Popclip](https://www.cbsofyalioglu.com/_next/image/?url=%2Fvideo%2Fpopclip-obsidian.gif&w=1536&q=75)
+
+
+Special thanks for Nick and EdM for their sharings on this [Popclip forum post](https://forum.popclip.app/t/clip-selection-to-obsidian/359/5)
