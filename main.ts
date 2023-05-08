@@ -1,7 +1,13 @@
-import { App, normalizePath, Plugin } from "obsidian";
+import {
+	App,
+	normalizePath,
+	Plugin,
+	FileManager,
+	TFile,
+	TFolder,
+} from "obsidian";
 import { SETTINGS } from "./settings";
 import type { Settings } from "./settings";
-
 
 export default class MyPlugin extends Plugin {
 	settings: Settings;
@@ -9,9 +15,7 @@ export default class MyPlugin extends Plugin {
 		await this.loadSettings();
 		this.registerObsidianProtocolHandler(SETTINGS.action, async (ev) => {
 			if (ev.heading === SETTINGS.actionHeading) {
-				new FileWriter(this.app).writeToFile(
-					JSON.parse(decodeURI(ev.data))
-				);
+				new FileWriter(this.app).writeToFile(JSON.parse(ev.data));
 			}
 		});
 	}
@@ -44,31 +48,44 @@ export class FileWriter {
 		this.app = app;
 	}
 	async writeToFile(payload: PopclipData) {
-		console.log("write", payload);
 		const path = this.normalizePath(payload);
 
-		this.app.vault.create(normalizePath(path), this.setContent(payload));
+		this.app.vault.adapter.write(
+			normalizePath(path),
+			this.setContent(payload)
+		);
 	}
 
 	normalizePath(payload: PopclipData) {
-		const fileName =
-			payload.title &&
-			typeof payload.title === "string" &&
-			payload.title.length < 60
-				? payload.title
-				: this.normalizeDate();
+		let fileName = this.normalizedDate();
+		if (payload.title) {
+			const title = payload.title.slice(0, 20).trim();
+			fileName = `${fileName}-${title}`;
+		}
 
-		let filePath: string = payload.path || "";
-		const path = slugify(`${filePath.trim()}/${fileName.trim()}`) + ".md";
+		if (SETTINGS.useSlugifyFileName) {
+			fileName = slugify(fileName);
+		}
+		fileName = fileName + ".md";
+
+		let filePath: string = decodeURIComponent(payload.path);
+		// const fileManager = new FileManager();
+		// const parentFolder: TFolder = fileManager.getNewFileParent(
+		// 	"",
+		// 	filePath
+		// );
+		console.log("parentFolder", filePath);
+		const path = normalizePath(filePath + "/" + fileName);
+		console.log(payload.path, filePath, path);
 		return path;
 	}
 
-	normalizeDate() {
+	normalizedDate() {
 		const datetime = new Date().toISOString().split(".")[0];
 		return datetime
 			.replaceAll("-", "")
 			.replaceAll(":", "")
-			.replace("t", "");
+			.replace("T", "");
 	}
 
 	setFrontmatter(payload: PopclipData) {
@@ -83,7 +100,12 @@ export class FileWriter {
 	}
 
 	setHeader(payload: PopclipData) {
-		return `# ${payload?.title}`;
+		return `# ${payload?.title}\n`;
+	}
+
+	setTable(payload: PopclipData) {
+		const currentDate = new Date().toISOString();
+		const source = payload?.source || "";
 	}
 
 	setContent(payload: PopclipData) {
@@ -92,7 +114,7 @@ export class FileWriter {
 			this.setHeader(payload),
 			payload?.clipping,
 		];
-		return elements.join("\n\n");
+		return elements.join("\n");
 	}
 }
 
