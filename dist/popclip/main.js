@@ -39,7 +39,9 @@ var DEFAULT_SETTINGS = {
 };
 var CUSTOM_SETTINGS = {
   useFrontmatter: true,
-  useHeader: true
+  useHeader: true,
+  useSlugifyFileName: true,
+  useTable: true
 };
 var SETTINGS = {
   ...DEFAULT_SETTINGS,
@@ -52,9 +54,7 @@ var MyPlugin = class extends import_obsidian.Plugin {
     await this.loadSettings();
     this.registerObsidianProtocolHandler(SETTINGS.action, async (ev) => {
       if (ev.heading === SETTINGS.actionHeading) {
-        new FileWriter(this.app).writeToFile(
-          JSON.parse(ev.data)
-        );
+        new FileWriter(this.app).writeToFile(JSON.parse(ev.data));
       }
     });
   }
@@ -75,18 +75,30 @@ var FileWriter = class {
   }
   async writeToFile(payload) {
     const path = this.normalizePath(payload);
-    this.app.vault.create((0, import_obsidian.normalizePath)(path), this.setContent(payload));
+    this.app.vault.adapter.write(
+      (0, import_obsidian.normalizePath)(path),
+      this.setContent(payload)
+    );
   }
   normalizePath(payload) {
-    const fileName = payload.title && typeof payload.title === "string" && payload.title.length < 60 ? payload.title : this.normalizeDate();
-    let filePath = decodeURIComponent(payload.path) || "";
-    console.log(payload.path, filePath);
-    const path = slugify(`${filePath.trim()}/${fileName.trim()}`) + ".md";
+    let fileName = this.normalizedDate();
+    if (payload.title) {
+      const title = payload.title.slice(0, 20).trim();
+      fileName = `${fileName}-${title}`;
+    }
+    if (SETTINGS.useSlugifyFileName) {
+      fileName = slugify(fileName);
+    }
+    fileName = fileName + ".md";
+    let filePath = decodeURIComponent(payload.path);
+    console.log("parentFolder", filePath);
+    const path = (0, import_obsidian.normalizePath)(filePath + "/" + fileName);
+    console.log(payload.path, filePath, path);
     return path;
   }
-  normalizeDate() {
+  normalizedDate() {
     const datetime = new Date().toISOString().split(".")[0];
-    return datetime.replaceAll("-", "").replaceAll(":", "").replace("t", "");
+    return datetime.replaceAll("-", "").replaceAll(":", "").replace("T", "");
   }
   setFrontmatter(payload) {
     const elements = [
@@ -99,7 +111,12 @@ var FileWriter = class {
     return elements.join("\n");
   }
   setHeader(payload) {
-    return `# ${payload == null ? void 0 : payload.title}`;
+    return `# ${payload == null ? void 0 : payload.title}
+`;
+  }
+  setTable(payload) {
+    const currentDate = new Date().toISOString();
+    const source = (payload == null ? void 0 : payload.source) || "";
   }
   setContent(payload) {
     const elements = [
@@ -107,7 +124,7 @@ var FileWriter = class {
       this.setHeader(payload),
       payload == null ? void 0 : payload.clipping
     ];
-    return elements.join("\n\n");
+    return elements.join("\n");
   }
 };
 function slugify(str) {
