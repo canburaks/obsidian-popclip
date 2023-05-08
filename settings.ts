@@ -7,6 +7,8 @@ interface DefaultSettings {
 interface CustomSettings {
     useFrontmatter: boolean;
     useHeader: boolean;
+    useSlugifyFileName: boolean;
+    useTable: boolean;
 }
 export type Settings = DefaultSettings & CustomSettings;
 
@@ -19,7 +21,9 @@ const DEFAULT_SETTINGS: DefaultSettings = {
 
 const CUSTOM_SETTINGS: CustomSettings = {
     useFrontmatter: true,
-    useHeader: true
+    useHeader: true,
+    useSlugifyFileName: true,
+    useTable: true
 };
 
 export const SETTINGS = {

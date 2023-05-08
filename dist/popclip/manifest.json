@@ -1,0 +1,11 @@
+{
+	"id": "popclip",
+	"name": "Popclip",
+	"version": "1.0.0",
+	"minAppVersion": "0.15.0",
+	"description": "This plugin sent the text you selected to Obsidian. It requires you to install Popclip MacOS app and and Obsidian extension for that .",
+	"author": "Can Burak Sofyalıoğlu",
+	"authorUrl": "https://www.cbsofyalioglu@.com/",
+	"fundingUrl": "",
+	"isDesktopOnly": true
+}
