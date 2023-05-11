@@ -24,12 +24,10 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 // main.ts
 var main_exports = {};
 __export(main_exports, {
-  FileWriter: () => FileWriter,
-  default: () => MyPlugin,
-  slugify: () => slugify
+  default: () => PopclipPlugin
 });
 module.exports = __toCommonJS(main_exports);
-var import_obsidian = require("obsidian");
+var import_obsidian3 = require("obsidian");
 
 // settings.ts
 var DEFAULT_SETTINGS = {
@@ -40,7 +38,7 @@ var DEFAULT_SETTINGS = {
 var CUSTOM_SETTINGS = {
   useFrontmatter: true,
   useHeader: true,
-  useSlugifyFileName: true,
+  useDatetimeAsFileName: true,
   useTable: true
 };
 var SETTINGS = {
@@ -48,30 +46,32 @@ var SETTINGS = {
   ...CUSTOM_SETTINGS
 };
 
-// main.ts
-var MyPlugin = class extends import_obsidian.Plugin {
-  async onload() {
-    await this.loadSettings();
-    this.registerObsidianProtocolHandler(SETTINGS.action, async (ev) => {
-      if (ev.heading === SETTINGS.actionHeading) {
-        new FileWriter(this.app).writeToFile(JSON.parse(ev.data));
-      }
-    });
+// src/modules/file-writer.ts
+var import_obsidian = require("obsidian");
+
+// src/utils/slugify.ts
+function slugify(str) {
+  str = str.replace(/^\s+|\s+$/g, "");
+  str = str.toLowerCase();
+  var from = "\u0131\xFC\xF6\xE7\u011F\xE0\xE1\xE4\xE2\xE8\xE9\xEB\xEA\xEC\xED\xEF\xEE\xF2\xF3\xF6\xF4\xF9\xFA\xFC\xFB\xF1\xE7\xB7/_,:;";
+  var to = "iuocgaaaaeeeeiiiioooouuuunc------";
+  for (var i = 0, l = from.length; i < l; i++) {
+    str = str.replace(new RegExp(from.charAt(i), "g"), to.charAt(i));
   }
-  onunload() {
+  str = str.replace(/[^a-z0-9 -]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-");
+  if (str.startsWith("-")) {
+    str = str.substring(1);
+  } else if (str.endsWith("-")) {
+    str = str.substring(0, str.length - 1);
   }
-  async loadSettings() {
-    this.settings = Object.assign({}, SETTINGS, await this.loadData());
-  }
-  async saveSettings() {
-    await this.saveData(this.settings);
-  }
-  async activateView() {
-  }
-};
+  return str;
+}
+
+// src/modules/file-writer.ts
 var FileWriter = class {
-  constructor(app) {
+  constructor(app, plugin) {
     this.app = app;
+    this.plugin = plugin;
   }
   async writeToFile(payload) {
     const path = this.normalizePath(payload);
@@ -82,18 +82,14 @@ var FileWriter = class {
   }
   normalizePath(payload) {
     let fileName = this.normalizedDate();
-    if (payload.title) {
-      const title = payload.title.slice(0, 20).trim();
-      fileName = `${fileName}-${title}`;
-    }
-    if (SETTINGS.useSlugifyFileName) {
-      fileName = slugify(fileName);
+    if (!this.plugin.settings.useDatetimeAsFileName) {
+      fileName = payload.title ? payload.title.slice(0, 20).trim() : slugify(payload.clipping.slice(0, 20).trim());
+    } else {
+      fileName = this.normalizedDate();
     }
     fileName = fileName + ".md";
     let filePath = decodeURIComponent(payload.path);
-    console.log("parentFolder", filePath);
     const path = (0, import_obsidian.normalizePath)(filePath + "/" + fileName);
-    console.log(payload.path, filePath, path);
     return path;
   }
   normalizedDate() {
@@ -119,27 +115,65 @@ var FileWriter = class {
     const source = (payload == null ? void 0 : payload.source) || "";
   }
   setContent(payload) {
-    const elements = [
-      this.setFrontmatter(payload),
-      this.setHeader(payload),
-      payload == null ? void 0 : payload.clipping
-    ];
+    const elements = [];
+    if (this.plugin.settings.useFrontmatter) {
+      elements.push(this.setFrontmatter(payload));
+    }
+    if (this.plugin.settings.useHeader && (payload == null ? void 0 : payload.title)) {
+      elements.push(this.setHeader(payload));
+    }
+    elements.push((payload == null ? void 0 : payload.clipping) || "");
     return elements.join("\n");
   }
 };
-function slugify(str) {
-  str = str.replace(/^\s+|\s+$/g, "");
-  str = str.toLowerCase();
-  var from = "\u0131\xFC\xF6\xE7\u011F\xE0\xE1\xE4\xE2\xE8\xE9\xEB\xEA\xEC\xED\xEF\xEE\xF2\xF3\xF6\xF4\xF9\xFA\xFC\xFB\xF1\xE7\xB7/_,:;";
-  var to = "iuocgaaaaeeeeiiiioooouuuunc------";
-  for (var i = 0, l = from.length; i < l; i++) {
-    str = str.replace(new RegExp(from.charAt(i), "g"), to.charAt(i));
+
+// src/modules/settings-tab.ts
+var import_obsidian2 = require("obsidian");
+var PopclipSettingsTab = class extends import_obsidian2.PluginSettingTab {
+  constructor(app, plugin) {
+    super(app, plugin);
+    this.plugin = plugin;
   }
-  str = str.replace(/[^a-z0-9 -]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-");
-  if (str.startsWith("-")) {
-    str = str.substring(1);
-  } else if (str.endsWith("-")) {
-    str = str.substring(0, str.length - 1);
+  display() {
+    let { containerEl } = this;
+    containerEl.empty();
+    new import_obsidian2.Setting(containerEl).setName("Frontmatter").setDesc("Add frontmatter to the top of the file").addToggle((toggle) => {
+      toggle.setValue(this.plugin.settings.useFrontmatter).onChange(async (value) => {
+        this.plugin.settings.useFrontmatter = value;
+        console.log("useFrontmatter", value);
+        await this.plugin.saveSettings();
+      });
+    });
+    new import_obsidian2.Setting(containerEl).setName("Header").setDesc(
+      "Use the title of the source page if exists as header of note."
+    ).addToggle((toggle) => {
+      toggle.setValue(this.plugin.settings.useHeader).onChange(async (value) => {
+        this.plugin.settings.useHeader = value;
+        await this.plugin.saveSettings();
+      });
+    });
   }
-  return str;
-}
+};
+
+// main.ts
+var PopclipPlugin = class extends import_obsidian3.Plugin {
+  async onload() {
+    await this.loadSettings();
+    this.addSettingTab(new PopclipSettingsTab(this.app, this));
+    this.registerObsidianProtocolHandler(SETTINGS.action, async (ev) => {
+      if (ev.heading === SETTINGS.actionHeading) {
+        new FileWriter(this.app, this).writeToFile(JSON.parse(ev.data));
+      }
+    });
+  }
+  onunload() {
+  }
+  async loadSettings() {
+    this.settings = Object.assign({}, SETTINGS, await this.loadData());
+  }
+  async saveSettings() {
+    await this.saveData(this.settings);
+  }
+  async activateView() {
+  }
+};
