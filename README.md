@@ -5,7 +5,7 @@ The plugin allows you to store the text you select on Obsidian which is captured
 - You need a Popclip app on your MacOS.
 - You need an Obsidian app on your MacOS.
 
-![Obsidian plugin for Popclip](https://static.cbsofyalioglu.com/public/projects/cbsofyalioglu-com/media/video/popclip-obsidian-demo.gif)
+![Obsidian plugin for Popclip](https://www.cbsofyalioglu.com/_next/image/?url=%2Fvideo%2Fpopclip-obsidian.gif&w=1536&q=75)
 
 ## How does it work?
 There are two part of the workflow. 
@@ -18,7 +18,7 @@ There are two part of the workflow.
 ## Part I: Popclip Extension
 You can select the below text to install extension.
 
-![Popclip Obsidian Plugin](https://static.cbsofyalioglu.com/public/projects/cbsofyalioglu-com/media/video/popclip-extension.gif)
+![Popclip Obsidian Plugin](https://www.cbsofyalioglu.com/_next/image/?url=%2Fvideo%2Finstall-popclip-extension.gif&w=1536&q=75)
 
 ```YAML
 # PopClip - Obsidian extension, markdown variant 
