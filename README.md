@@ -16,7 +16,7 @@ There are two part of the workflow.
 
 
 ## Part I: Popclip Extension
-You can select the below text to install extension.
+You can select the below text to install extension. Fill the `vault` as your Obsidian vault name, and `location` as the target directory which must be relative to the root of the vault.
 
 ![Popclip Obsidian Plugin](https://static.cbsofyalioglu.com/public/projects/cbsofyalioglu-com/media/video/popclip-extension.gif)
 
