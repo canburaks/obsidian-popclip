@@ -16,6 +16,7 @@ declare global {
 	interface CustomSettings {
 		useFrontmatter: boolean;
 		useHeader: boolean;
+		usePopclipHeading: boolean;
 		useSlugifyFileName?: boolean;
 		useTable: boolean;
 		useDatetimeAsFileName: boolean;

@@ -38,6 +38,20 @@ export class PopclipSettingsTab extends PluginSettingTab {
 						await this.plugin.saveSettings();
 					});
 			});
+		new Setting(containerEl)
+			.setName("Popclip Heading")
+			.setDesc(
+				"IMPORTANT!!! Deactivate this if you got error when using popclip with this plugin. This settings can broke things. Thus, always take a backup before changing this setting."
+			)
+			.addToggle((toggle) => {
+				toggle
+					.setValue(this.plugin.settings.usePopclipHeading)
+					.onChange(async (value) => {
+						console.log("setting usePopclipHeading", value);
+						this.plugin.settings.usePopclipHeading = value;
+						await this.plugin.saveSettings();
+					});
+			});
 		// new Setting(containerEl)
 		// 	.setName("Datetime Filename")
 		// 	.setDesc(
