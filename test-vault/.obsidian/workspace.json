@@ -1,0 +1,176 @@
+{
+  "main": {
+    "id": "ff5d2db1e62c6fd0",
+    "type": "split",
+    "children": [
+      {
+        "id": "5a322abfe43ce696",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "6afa6d8e582c393d",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "20240309203038.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "c3fe50f2725a2db8",
+    "type": "split",
+    "children": [
+      {
+        "id": "92eeb0badd45df9d",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "d07460e1c61f6025",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "08595766ef1d2217",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "548856215e910744",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "a4620e981c85e2ea",
+    "type": "split",
+    "children": [
+      {
+        "id": "0c8f7f0e64fba318",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "98447e7f4dbd4ca5",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "20240309203038.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "05fc24977a557ca9",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "20240309203038.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "76eb32da91c32843",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              }
+            }
+          },
+          {
+            "id": "6fa3558ffc3340ac",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "20240309203038.md"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "obsidian42-brat:BRAT": false,
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false
+    }
+  },
+  "active": "6afa6d8e582c393d",
+  "lastOpenFiles": [
+    "20240309203353.md",
+    "20240309203245.md",
+    "20240309203038.md",
+    "20240309202740.md",
+    "20240309202718.md",
+    "20240309202700.md",
+    "20240309202634.md",
+    "20240309202525.md",
+    "20240309202458.md",
+    "20240309202432.md",
+    "20240309202225.md",
+    "20240309202319.md",
+    "20240309202252.md",
+    "20240309201234.md",
+    "20240309201153.md",
+    "20240309200924.md",
+    "20240309200901.md",
+    "20240309200719.md",
+    "20240309200358.md",
+    "20240309195547.md",
+    "20240309200039.md",
+    "20240309195532.md",
+    "20230729002858.md"
+  ]
+}

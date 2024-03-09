@@ -16,7 +16,11 @@ export default class PopclipPlugin extends Plugin {
 		this.addSettingTab(new PopclipSettingsTab(this.app, this));
 
 		this.registerObsidianProtocolHandler(SETTINGS.action, async (ev) => {
-			if (ev.heading === SETTINGS.actionHeading) {
+			if (ev?.heading) {
+				if (ev?.heading === SETTINGS.actionHeading) {
+					new FileWriter(this.app, this).writeToFile(JSON.parse(ev.data));
+				}
+			} else if (!this.settings.usePopclipHeading) {
 				new FileWriter(this.app, this).writeToFile(JSON.parse(ev.data));
 			}
 		});
@@ -34,5 +38,5 @@ export default class PopclipPlugin extends Plugin {
 		await this.saveData(this.settings);
 	}
 
-	async activateView() {}
+	async activateView() { }
 }

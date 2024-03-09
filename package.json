@@ -8,6 +8,7 @@
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
 		"version": "node version-bump.mjs && git add manifest.json versions.json",
 		"deploy": "npm run build && cp main.js styles.css manifest.json dist/popclip/",
+		"deploy:test-vault": "npm run build && cp main.js styles.css manifest.json ./test-vault/.obsidian/plugins/popclip",
 		"deploy:test": "npm run build && cp main.js styles.css manifest.json ~/Downloads/test/.obsidian/plugins/popclip"
 	},
 	"keywords": [],

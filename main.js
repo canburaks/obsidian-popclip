@@ -37,6 +37,7 @@ var DEFAULT_SETTINGS = {
 };
 var CUSTOM_SETTINGS = {
   useFrontmatter: true,
+  usePopclipHeading: true,
   useHeader: true,
   useDatetimeAsFileName: true,
   useTable: true
@@ -152,6 +153,15 @@ var PopclipSettingsTab = class extends import_obsidian2.PluginSettingTab {
         await this.plugin.saveSettings();
       });
     });
+    new import_obsidian2.Setting(containerEl).setName("Popclip Heading").setDesc(
+      "IMPORTANT!!! Deactivate this if you got error when using popclip with this plugin. This settings can broke things. Thus, always take a backup before changing this setting."
+    ).addToggle((toggle) => {
+      toggle.setValue(this.plugin.settings.usePopclipHeading).onChange(async (value) => {
+        console.log("setting usePopclipHeading", value);
+        this.plugin.settings.usePopclipHeading = value;
+        await this.plugin.saveSettings();
+      });
+    });
   }
 };
 
@@ -161,7 +171,11 @@ var PopclipPlugin = class extends import_obsidian3.Plugin {
     await this.loadSettings();
     this.addSettingTab(new PopclipSettingsTab(this.app, this));
     this.registerObsidianProtocolHandler(SETTINGS.action, async (ev) => {
-      if (ev.heading === SETTINGS.actionHeading) {
+      if (ev == null ? void 0 : ev.heading) {
+        if ((ev == null ? void 0 : ev.heading) === SETTINGS.actionHeading) {
+          new FileWriter(this.app, this).writeToFile(JSON.parse(ev.data));
+        }
+      } else if (!this.settings.usePopclipHeading) {
         new FileWriter(this.app, this).writeToFile(JSON.parse(ev.data));
       }
     });

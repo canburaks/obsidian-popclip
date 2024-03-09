@@ -9,6 +9,7 @@ const DEFAULT_SETTINGS: DefaultSettings = {
 
 const CUSTOM_SETTINGS: CustomSettings = {
     useFrontmatter: true,
+    usePopclipHeading: true,
     useHeader: true,
     useDatetimeAsFileName: true,
     useTable: true,
