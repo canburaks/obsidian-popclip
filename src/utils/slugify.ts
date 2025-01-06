@@ -3,9 +3,9 @@ export function slugify(str: string) {
 	str = str.toLowerCase();
 
 	// remove accents, swap ñ for n, etc
-	var from = "ıüöçğàáäâèéëêìíïîòóöôùúüûñç·/_,:;";
-	var to = "iuocgaaaaeeeeiiiioooouuuunc------";
-	for (var i = 0, l = from.length; i < l; i++) {
+	const from = "ıüöçğàáäâèéëêìíïîòóöôùúüûñç·/_,:;";
+	const to = "iuocgaaaaeeeeiiiioooouuuunc------";
+	for (let i = 0, l = from.length; i < l; i++) {
 		str = str.replace(new RegExp(from.charAt(i), "g"), to.charAt(i));
 	}
 
