@@ -1,7 +1,15 @@
-import ExamplePlugin from "../../main";
+/**
+ * Settings tab module for the Obsidian Popclip plugin
+ * Handles the UI components for configuring plugin settings
+ */
+
 import { App, PluginSettingTab, Setting } from "obsidian";
 import PopclipPlugin from "../../main";
 
+/**
+ * Settings tab class that extends Obsidian's PluginSettingTab
+ * Creates and manages the settings interface in Obsidian's settings panel
+ */
 export class PopclipSettingsTab extends PluginSettingTab {
 	plugin: PopclipPlugin;
 
@@ -10,9 +18,15 @@ export class PopclipSettingsTab extends PluginSettingTab {
 		this.plugin = plugin;
 	}
 
-	display(): void {
-		let { containerEl } = this;
+	/**
+	 * Displays the settings interface
+	 * Creates toggle switches for various plugin features
+	 */
+	display() {
+		const { containerEl } = this;
 		containerEl.empty();
+
+		// Frontmatter toggle setting
 		new Setting(containerEl)
 			.setName("Frontmatter")
 			.setDesc("Add frontmatter to the top of the file")
@@ -25,6 +39,8 @@ export class PopclipSettingsTab extends PluginSettingTab {
 						await this.plugin.saveSettings();
 					});
 			});
+
+		// Header toggle setting
 		new Setting(containerEl)
 			.setName("Header")
 			.setDesc(
@@ -38,6 +54,8 @@ export class PopclipSettingsTab extends PluginSettingTab {
 						await this.plugin.saveSettings();
 					});
 			});
+
+		// Popclip heading toggle setting
 		new Setting(containerEl)
 			.setName("Popclip Heading")
 			.setDesc(
@@ -52,18 +70,5 @@ export class PopclipSettingsTab extends PluginSettingTab {
 						await this.plugin.saveSettings();
 					});
 			});
-		// new Setting(containerEl)
-		// 	.setName("Datetime Filename")
-		// 	.setDesc(
-		// 		"Use datetime of clipping as filename. If not selected, use slugified title of clipping."
-		// 	)
-		// 	.addToggle((toggle) => {
-		// 		toggle
-		// 			.setValue(this.plugin.settings.useDatetimeAsFileName)
-		// 			.onChange(async (value) => {
-		// 				this.plugin.settings.useDatetimeAsFileName = value;
-		// 				await this.plugin.saveSettings();
-		// 			});
-		// 	});
 	}
 }
