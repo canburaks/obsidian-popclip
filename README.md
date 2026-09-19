@@ -52,9 +52,7 @@ javaScript: |
     data.source = popclip.context.browserUrl;
   }
 
-  const url = new URL("obsidian://popclip");
-  url.searchParams.set("vault", vaultName);
-  url.searchParams.set("data", JSON.stringify(data));
+  const url = `obsidian://popclip?vault=${encodeURIComponent(vaultName)}&data=${encodeURIComponent(JSON.stringify(data))}`;
   await popclip.openUrl(url);
 ```
 
