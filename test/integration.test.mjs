@@ -2,83 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 import vm from "node:vm";
-import { build } from "esbuild";
-
-const obsidianStub = `
-export class Plugin {
-  constructor(app) {
-    this.app = app;
-    this.protocolHandlers = new Map();
-  }
-  async loadData() { return {}; }
-  async saveData() {}
-  addSettingTab() {}
-  registerObsidianProtocolHandler(action, handler) {
-    this.protocolHandlers.set(action, handler);
-  }
-}
-export class PluginSettingTab {
-  constructor(app, plugin) {
-    this.app = app;
-    this.plugin = plugin;
-    this.containerEl = { empty() {} };
-  }
-}
-export class Setting {
-  setName() { return this; }
-  setDesc() { return this; }
-  addToggle() { return this; }
-}
-export class Notice {
-  static messages = [];
-  constructor(message) {
-    Notice.messages.push(message);
-    globalThis.__notices.push(String(message));
-  }
-}
-export class TFolder {}
-export function normalizePath(path) {
-  return path.replaceAll("\\\\", "/").replace(/\\/{2,}/g, "/").replace(/^\\.\\//, "").replace(/\\/$/, "");
-}
-`;
-
-async function bundle(entryPoint) {
-	const result = await build({
-		absWorkingDir: new URL("..", import.meta.url).pathname,
-		bundle: true,
-		entryPoints: [entryPoint],
-		format: "cjs",
-		platform: "node",
-		write: false,
-		plugins: [
-			{
-				name: "obsidian-stub",
-				setup(buildApi) {
-					buildApi.onResolve({ filter: /^obsidian$/ }, () => ({
-						path: "obsidian",
-						namespace: "obsidian-stub",
-					}));
-					buildApi.onLoad(
-						{ filter: /.*/, namespace: "obsidian-stub" },
-						() => ({ contents: obsidianStub, loader: "js" })
-					);
-				},
-			},
-		],
-	});
-
-	const module = { exports: {} };
-	const notices = [];
-	vm.runInNewContext(result.outputFiles[0].text, {
-		__notices: notices,
-		console: { ...console, error() {} },
-		module,
-		exports: module.exports,
-		setTimeout,
-	});
-	Object.defineProperty(module.exports, "__testNotices", { value: notices });
-	return module.exports;
-}
+import { bundle, yaml } from "./helpers.mjs";
 
 function getPopclipScript(readme) {
 	const block = readme.match(/```ya?ml\n([\s\S]*?)```/i)?.[1];
@@ -86,15 +10,9 @@ function getPopclipScript(readme) {
 	assert.match(block, /^#popclip(?:\s|$)/i);
 	assert.match(block, /^identifier:\s*ObsidianClipper\s*$/im);
 
-	const marker = /^javaScript:\s*\|\s*$/im;
-	const markerMatch = marker.exec(block);
-	assert.ok(markerMatch, "snippet contains a javaScript action");
-	return block
-		.slice(markerMatch.index + markerMatch[0].length)
-		.split("\n")
-		.filter((line) => line.trim() !== "#end")
-		.map((line) => line.replace(/^ {2,4}/, ""))
-		.join("\n");
+	const config = yaml.load(block);
+	assert.equal(typeof config.javaScript, "string");
+	return config.javaScript;
 }
 
 test("the README PopClip snippet uses the supplied full-color Obsidian icon", async () => {
@@ -118,6 +36,8 @@ test("the README PopClip snippet sends one encoded payload to the plugin action"
 		context: {
 			browserTitle: "A useful page",
 			browserUrl: "https://example.com/article?q=one&lang=en",
+			appName: "Safari",
+			appIdentifier: "com.apple.Safari",
 		},
 		input: { markdown: "**Selected** text", text: "Selected text" },
 		openUrl(url) {
@@ -138,8 +58,16 @@ test("the README PopClip snippet sends one encoded payload to the plugin action"
 	assert.equal(url.protocol, "obsidian:");
 	assert.equal(url.hostname, "popclip");
 	assert.equal(url.searchParams.get("vault"), "Personal Vault");
-	assert.deepEqual(JSON.parse(url.searchParams.get("data")), {
+	const data = JSON.parse(url.searchParams.get("data"));
+	assert.ok(Number.isFinite(Date.parse(data.capturedAt)));
+	delete data.capturedAt;
+	assert.deepEqual(data, {
+		schemaVersion: 2,
 		clipping: "**Selected** text",
+		format: "markdown",
+		appName: "Safari",
+		appIdentifier: "com.apple.Safari",
+		tags: [],
 		path: "Research notes",
 		title: "A useful page",
 		source: "https://example.com/article?q=one&lang=en",
@@ -216,7 +144,7 @@ test("the writer creates the target folder and note through the Vault API", asyn
 		["vault.createFolder", "vault.create"]
 	);
 	assert.equal(file.path, "Clippings/Web/An article-title.md");
-	assert.match(calls[1][2], /title: "An article\/title"/);
+	assert.equal(yaml.load(calls[1][2].split("---")[1]).title, "An article/title");
 });
 
 test("the protocol payload parser rejects malformed and mistyped data", async () => {

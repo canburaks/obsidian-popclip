@@ -1,10 +1,11 @@
 import { Notice, ObsidianProtocolData, Plugin } from "obsidian";
 import { FileWriter, PopclipSettingsTab } from "./src/modules";
 import { parsePopclipData } from "./src/utils";
-import { DEFAULT_SETTINGS, PROTOCOL_ACTION } from "./settings";
+import { loadSettings, PROTOCOL_ACTION } from "./settings";
 
 export default class PopclipPlugin extends Plugin {
 	settings: Settings;
+	private requests: Promise<void> = Promise.resolve();
 
 	async onload() {
 		await this.loadSettings();
@@ -16,17 +17,31 @@ export default class PopclipPlugin extends Plugin {
 	}
 
 	async loadSettings() {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+		this.settings = loadSettings(await this.loadData());
 	}
 
 	async saveSettings() {
 		await this.saveData(this.settings);
 	}
 
-	private async handleProtocolRequest(params: ObsidianProtocolData) {
+	private handleProtocolRequest(params: ObsidianProtocolData) {
+		const next = this.requests.then(() => this.saveSelection(params));
+		this.requests = next.catch(() => undefined);
+		return next;
+	}
+
+	private async saveSelection(params: ObsidianProtocolData) {
 		try {
 			const payload = parsePopclipData(params.data);
 			const file = await new FileWriter(this.app, this).writeToFile(payload);
+			if (payload.openAfterSave ?? this.settings.openAfterSave) {
+				try {
+					await this.app.workspace.getLeaf(this.settings.openInNewTab ? "tab" : false).openFile(file);
+				} catch {
+					new Notice(`PopClip saved the selection to ${file.path}, but could not open the note.`);
+					return;
+				}
+			}
 			new Notice(`Saved PopClip selection to ${file.path}`);
 		} catch (error) {
 			const message = error instanceof Error ? error.message : String(error);

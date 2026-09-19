@@ -1,6 +1,6 @@
 {
 	"name": "obsidian-popclip",
-	"version": "1.1.0",
+	"version": "1.2.0",
 	"description": "Save PopClip selections as Markdown notes in Obsidian.",
 	"main": "main.js",
 	"scripts": {

@@ -1,19 +1,19 @@
 # Obsidian PopClip
 
-Save text selected on macOS as a new Markdown note in an Obsidian vault. The integration has two parts: a PopClip extension sends the selection through an Obsidian URL, and this Obsidian plugin creates the note.
+Save text selected on macOS into an Obsidian vault. Create a new note, append to an Inbox or another note, or collect clips in daily notes. A PopClip extension sends the selection through an Obsidian URL, and this Obsidian plugin saves it with source details and tags.
 
 ## Requirements
 
 - [PopClip](https://www.popclip.app/) on macOS
-- [Obsidian](https://obsidian.md/) with community plugins enabled
+- [Obsidian](https://obsidian.md/) 1.1.0 or newer with community plugins enabled
 
 ![Obsidian plugin for PopClip](https://static.cbsofyalioglu.com/public/projects/cbsofyalioglu-com/media/video/popclip-obsidian-demo.gif)
 
 ## 1. Install the PopClip extension
 
-Select the entire YAML block below. PopClip will offer to install it. In the extension options, enter the vault name exactly as it appears in Obsidian and choose a destination folder relative to the vault root. The default folder is `Clippings`.
+Select the entire YAML block below. PopClip will offer to install it. Enter the vault name exactly as it appears in Obsidian and choose a folder for new notes, relative to the vault root. The default folder is `Clippings`; leave it empty to use the root. Choose a save mode and optional comma- or space-separated tags. Append and daily destinations are configured in Obsidian.
 
-If you installed an older version of this snippet, selecting and installing this block replaces it.
+If you installed an older version of this snippet, selecting and installing this block replaces it. Update the Obsidian plugin first. The extension does not need Advanced URI.
 
 ```yaml
 #popclip
@@ -35,9 +35,18 @@ options:
     type: string
   - identifier: path
     label: Destination folder
-    description: Use a path relative to the vault root. Missing folders are created automatically.
+    description: New notes only. Use a vault-relative path; leave empty for the vault root.
     type: string
     defaultValue: Clippings
+  - identifier: mode
+    label: Save mode
+    type: multiple
+    values: [default, create, append, daily]
+    valueLabels: [Obsidian setting, New note, Append to note, Daily note]
+  - identifier: tags
+    label: Tags
+    type: string
+    description: Comma- or space-separated tags, added to the Obsidian defaults.
 javaScript: |
   const vaultName = String(popclip.options.vault ?? "").trim();
   if (!vaultName) {
@@ -45,8 +54,15 @@ javaScript: |
   }
 
   const data = {
+    schemaVersion: 2,
     clipping: popclip.input.markdown || popclip.input.text,
+    format: popclip.input.markdown ? "markdown" : "text",
     path: String(popclip.options.path ?? "").trim(),
+    capturedAt: new Date().toISOString(),
+    appName: popclip.context.appName,
+    appIdentifier: popclip.context.appIdentifier,
+    tags: String(popclip.options.tags ?? "").split(/[,\s]+/).filter(Boolean),
+    mode: popclip.options.mode === "default" ? undefined : popclip.options.mode,
   };
   if (popclip.context.browserUrl) {
     data.title = popclip.context.browserTitle;
@@ -54,6 +70,7 @@ javaScript: |
   }
 
   const url = `obsidian://popclip?vault=${encodeURIComponent(vaultName)}&data=${encodeURIComponent(JSON.stringify(data))}`;
+  if (url.length > 60000) throw new Error("Clip too large: choose a shorter selection.");
   await popclip.openUrl(url);
 ```
 
@@ -68,6 +85,69 @@ The plugin is not yet in the Obsidian Community plugins directory, so install it
 
 The installed folder must contain `main.js`, `manifest.json`, and `styles.css`. To build those files from source, run `npm install` followed by `npm run deploy`.
 
+## 3. Choose how clips are saved
+
+Open **Settings → PopClip** in Obsidian. A new installation creates separate notes by default. The PopClip extension's **Save mode** can follow these settings or override the mode for that extension instance.
+
+| Mode | Destination | Behavior |
+| --- | --- | --- |
+| New note | The folder selected in PopClip | Creates a new file, using a timestamp or the title/selection as its filename. Existing names receive a suffix. |
+| Append to note | **Append note**, initially `Clippings/Inbox.md` | Adds each clip to that file, creating it and its parent folders if needed. |
+| Daily note | **Daily note folder** and **Daily note date format** | Adds clips to the note for their local capture date, creating it if needed. Defaults to `Daily notes/YYYY-MM-DD.md`. |
+
+Daily note settings are independent of Obsidian's core Daily notes plugin. Set the same folder and date format to use the same notes. Formats such as `YYYY/MM/YYYY-MM-DD` support subfolders. Core daily-note templates are not applied.
+
+For append/daily modes, set **Append heading** to a heading's exact text, or leave it empty to append at the end. A missing heading is created as a level-2 heading by default; **When the heading is missing** can instead append at the end. Clips are placed at the end of the matching section, before the next section of the same or higher level. Duplicate matching headings produce a clear error without changing the note.
+
+**Open note after saving** shows the destination after a successful save. **Open in a new tab** controls where it appears. Both are off by default. The Obsidian URL handoff can still activate the app even when opening the note is disabled.
+
+## Metadata and tags
+
+The updated extension sends the selected Markdown, with plain text as fallback, capture time, source application, browser page title/URL when available, and optional tags. It sends only the selection and its context; it does not fetch the full page or contact a remote service. Browser details depend on PopClip's support for the source browser.
+
+With **Add clip metadata** enabled, new notes include properties like:
+
+```yaml
+---
+title: A useful article
+source: https://example.com/article
+date: '2026-09-19T18:01:00.000Z'
+captured: '2026-09-19T18:00:00.000Z'
+domain: example.com
+source_app: Safari
+source_app_id: com.apple.Safari
+format: markdown
+tags:
+  - clip
+  - research/web
+---
+```
+
+`date` is the time Obsidian saves the note; `captured` is when PopClip captured the selection. Unavailable fields are omitted. Default tags in Obsidian are combined with tags from PopClip, with duplicates removed. Leading `#` is optional; nested and Unicode tags are supported. Tags cannot contain spaces or consist only of numbers.
+
+Appended clips include their own metadata below the selection, including inline tags. The destination note's existing properties are left unchanged; new frontmatter is not inserted into its body. Turning off **Add clip metadata** removes generated properties/metadata from new captures, including tags. **Include page title** separately controls the title above the selection.
+
+## Upgrading and troubleshooting
+
+1. Replace the Obsidian plugin files with `dist/popclip` version 1.2.0 and restart or reload the plugin.
+2. Reinstall the README's PopClip snippet for the new metadata, tags, and save-mode options.
+3. Check the vault name and choose the desired destinations in **Settings → PopClip**.
+
+Older snippets remain supported by the new plugin. Existing title, filename, and metadata settings are retained. New options use defaults until configured.
+
+- **No clip appears:** check that the PopClip plugin is enabled in the selected vault and that the vault name matches; updating the Obsidian plugin does not update the PopClip extension.
+- **Clip too large:** select a shorter passage. The extension limits the encoded URL to 60,000 characters as an application safeguard; this is not a guaranteed OS transport limit. The plugin separately limits decoded messages to 120,000 characters and selections to 100,000.
+- **Ambiguous heading:** use a heading that occurs once, or clear the heading setting to append at the end.
+- **Unclosed Markdown block:** close any unclosed frontmatter, code fence, or HTML comment in the destination before appending.
+- **Invalid destination:** use a vault-relative path without hidden folders or `..`; append targets must end in `.md`. A literal `%20` stays part of a folder name.
+- **Saved but could not open:** the clip is already on disk; navigate to the path in the notice rather than clipping again.
+
+All requests use the plugin's own `obsidian://popclip` handler. Existing notes are never replaced; repeated intentional captures create separate notes or entries.
+
+## Protocol and implementation
+
+The plugin accepts the original unversioned message (`clipping`, optional `path`, `title`, `source`) and version-2 messages. The full field contract, implementation plan, and verification scope are in [the implementation plan](docs/implementation-plan.md) and [protocol documentation](docs/protocol.md).
+
 ## Development
 
 - `npm test` runs the PopClip-to-Obsidian contract tests.
@@ -75,5 +155,7 @@ The installed folder must contain `main.js`, `manifest.json`, and `styles.css`. 
 - `npm run deploy:test-vault` builds and installs the plugin into the included development vault.
 
 Use a disposable vault for development and testing.
+
+The README snippet must stay self-contained and below PopClip's [5,000-character selection limit](https://www.popclip.app/dev/snippets). Its script uses the documented [input](https://www.popclip.app/dev/api/interfaces/Input.html) and [context](https://www.popclip.app/dev/api/interfaces/Context.html) fields. Appends use Obsidian's [atomic Vault processing](https://docs.obsidian.md/Plugins/Vault).
 
 Special thanks to Nick and EdM for their contributions in this [PopClip forum discussion](https://forum.popclip.app/t/clip-selection-to-obsidian/359/5).
