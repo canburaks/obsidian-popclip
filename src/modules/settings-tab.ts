@@ -26,26 +26,21 @@ export class PopclipSettingsTab extends PluginSettingTab {
 		const { containerEl } = this;
 		containerEl.empty();
 
-		// Frontmatter toggle setting
 		new Setting(containerEl)
-			.setName("Frontmatter")
+			.setName("Add frontmatter")
 			.setDesc("Add frontmatter to the top of the file")
 			.addToggle((toggle) => {
 				toggle
 					.setValue(this.plugin.settings.useFrontmatter)
 					.onChange(async (value) => {
 						this.plugin.settings.useFrontmatter = value;
-						console.log("useFrontmatter", value);
 						await this.plugin.saveSettings();
 					});
 			});
 
-		// Header toggle setting
 		new Setting(containerEl)
-			.setName("Header")
-			.setDesc(
-				"Use the title of the source page if exists as header of note."
-			)
+			.setName("Use page title as heading")
+			.setDesc("Add the source page title as the note heading when available")
 			.addToggle((toggle) => {
 				toggle
 					.setValue(this.plugin.settings.useHeader)
@@ -55,18 +50,14 @@ export class PopclipSettingsTab extends PluginSettingTab {
 					});
 			});
 
-		// Popclip heading toggle setting
 		new Setting(containerEl)
-			.setName("Popclip Heading")
-			.setDesc(
-				"IMPORTANT!!! Deactivate this if you got error when using popclip with this plugin. This settings can broke things. Thus, always take a backup before changing this setting."
-			)
+			.setName("Use date and time as filename")
+			.setDesc("Turn off to derive the filename from the page title or selection")
 			.addToggle((toggle) => {
 				toggle
-					.setValue(this.plugin.settings.usePopclipHeading)
+					.setValue(this.plugin.settings.useDatetimeAsFileName)
 					.onChange(async (value) => {
-						console.log("setting usePopclipHeading", value);
-						this.plugin.settings.usePopclipHeading = value;
+						this.plugin.settings.useDatetimeAsFileName = value;
 						await this.plugin.saveSettings();
 					});
 			});

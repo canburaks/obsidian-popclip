@@ -1,10 +1,5 @@
 {
-  "mySetting": "default",
-  "actionHeading": "popclip",
-  "action": "advanced-uri",
   "useFrontmatter": true,
-  "usePopclipHeading": true,
   "useHeader": false,
-  "useDatetimeAsFileName": true,
-  "useTable": true
+  "useDatetimeAsFileName": true
 }
