@@ -1,9 +1,9 @@
 {
 	"id": "popclip",
 	"name": "PopClip",
-	"version": "1.1.0",
-	"minAppVersion": "0.15.0",
-	"description": "Save text selected with PopClip as a new Markdown note in an Obsidian vault.",
+	"version": "1.2.0",
+	"minAppVersion": "1.1.0",
+	"description": "Save PopClip selections with source details and tags, or append them to existing and daily notes.",
 	"author": "Can Burak Sofyalıoğlu",
 	"authorUrl": "https://cbsofyalioglu.com/",
 	"isDesktopOnly": true
