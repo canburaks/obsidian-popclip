@@ -108,7 +108,8 @@ test("the README PopClip snippet sends one encoded payload to the plugin action"
 		},
 		input: { markdown: "**Selected** text", text: "Selected text" },
 		openUrl(url) {
-			openedUrl = String(url);
+			assert.equal(typeof url, "string");
+			openedUrl = url;
 		},
 		options: { path: "Research notes", vault: "Personal Vault" },
 	};
@@ -120,6 +121,7 @@ test("the README PopClip snippet sends one encoded payload to the plugin action"
 	});
 
 	const url = new URL(openedUrl);
+	assert.doesNotMatch(openedUrl, /\+/);
 	assert.equal(url.protocol, "obsidian:");
 	assert.equal(url.hostname, "popclip");
 	assert.equal(url.searchParams.get("vault"), "Personal Vault");
