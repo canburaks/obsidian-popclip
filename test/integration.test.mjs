@@ -97,6 +97,19 @@ function getPopclipScript(readme) {
 		.join("\n");
 }
 
+test("the README PopClip snippet uses the supplied full-color Obsidian icon", async () => {
+	const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+	const block = readme.match(/```ya?ml\n([\s\S]*?)```/i)?.[1];
+
+	assert.ok(block, "README contains an installable PopClip YAML snippet");
+	assert.ok(block.length <= 5000, "snippet stays within PopClip's selection limit");
+	assert.match(
+		block,
+		/^icon:\s*\|-\n\s+preserve-color svg:<svg\b[\s\S]*?<\/svg>/m
+	);
+	assert.match(block, /fill="#6c31e3"/);
+});
+
 test("the README PopClip snippet sends one encoded payload to the plugin action", async () => {
 	const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
 	const script = getPopclipScript(readme);
